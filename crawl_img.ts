@@ -1,8 +1,8 @@
-const entities = await Bun.file('entities.json').json() as Entity[];
+const entities = await Bun.file('entities_new.json').json() as Entity[];
 
 const range = {
   start: 0,
-  end: 5,
+  end: entities.length,
 }
 
 const entitiesToProcess = entities.slice(range.start, range.end);
@@ -11,7 +11,7 @@ const res = await Promise.allSettled(
   entitiesToProcess.map(async (entity) => {
     const image = await fetch(entity.image);
     const imageBlob = await image.blob();
-    await Bun.write(`images/${entity.name}.jpg`, imageBlob);
+    await Bun.write(`image_job/${entity.name}.jpg`, imageBlob);
   })
 );
 
