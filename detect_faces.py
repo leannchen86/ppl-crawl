@@ -4,15 +4,16 @@ Analyzes the first few images in ppl-images/aaron to detect faces.
 """
 
 import os
-os.environ['CUDA_VISIBLE_DEVICES'] = '1'  # Use GPU 1
+os.environ['CUDA_VISIBLE_DEVICES'] = '1'
 
 import cv2
 from batch_face import RetinaFace
+from concurrent.futures import ThreadPoolExecutor
 
 # Path to images
 IMAGE_DIR = "/home/leann/ppl-images/alex"
 
-images_count = 10
+images_count = 1000
 image_files = [f"{i}.jpg" for i in range(images_count)]
 
 # Initialize RetinaFace detector with GPU and FP16
@@ -22,17 +23,28 @@ print("=" * 60)
 print("Face Detection Results using RetinaFace (batch-face)")
 print("=" * 60)
 
-# Load all images
+# Load all images in parallel
 print("\nLoading images...")
-images = []
-valid_files = []
-for img_file in image_files:
+
+def load_image(img_file):
+    """Load a single image and return (filename, image) or (filename, None) if failed."""
     img_path = os.path.join(IMAGE_DIR, img_file)
     if os.path.exists(img_path):
         img = cv2.imread(img_path)
         if img is not None:
-            images.append(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
-            valid_files.append(img_file)
+            return (img_file, cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
+    return (img_file, None)
+
+with ThreadPoolExecutor() as executor:
+    results = list(executor.map(load_image, image_files))
+
+# Filter successful loads and preserve order
+images = []
+valid_files = []
+for img_file, img in results:
+    if img is not None:
+        valid_files.append(img_file)
+        images.append(img)
 
 print(f"Loaded {len(images)} images")
 
