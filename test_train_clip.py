@@ -215,6 +215,38 @@ class CLIPTrainer:
         return self.model
 
 
+def zero_shot_baseline(model, val_loader, candidate_names, tokenizer, device):
+    """Test vanilla CLIP without any fine-tuning."""
+    model.eval()
+    correct = 0
+    total = 0
+    
+    # Use simple prompt template for zero-shot
+    candidate_texts = [f"a photo of {n.capitalize()}" for n in candidate_names]
+    candidate_tokens = tokenizer(candidate_texts).to(device)
+    
+    with torch.no_grad(), torch.amp.autocast("cuda"):
+        cand_text_features = model.encode_text(candidate_tokens)
+        cand_text_features = cand_text_features / cand_text_features.norm(dim=-1, keepdim=True)
+        
+        name_to_idx = {n: i for i, n in enumerate(candidate_names)}
+        
+        for images, _text_tokens, names in val_loader:
+            images = images.to(device)
+            image_features = model.encode_image(images)
+            image_features = image_features / image_features.norm(dim=-1, keepdim=True)
+            
+            logit_scale = model.logit_scale.exp()
+            logits = logit_scale * image_features @ cand_text_features.T
+            
+            preds = logits.argmax(dim=1).tolist()
+            labels = [name_to_idx[n] for n in names]
+            correct += sum(int(p == y) for p, y in zip(preds, labels))
+            total += len(names)
+    
+    return correct / max(1, total)
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--lr", type=float, default=1e-6)
@@ -223,17 +255,43 @@ def main():
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--index-dir", default="/home/leann/face-detection")
     parser.add_argument("--output-dir", default="./exp1_2names")
+    parser.add_argument("--zero-shot-only", action="store_true", help="Only run zero-shot baseline")
     args = parser.parse_args()
 
     device = "cuda" if torch.cuda.is_available() else "cpu"
     seed_everything(args.seed)
     
     # ============================================
-    # EXPERIMENT 1: Just 2 names (david vs laura)
+    # EXPERIMENT SELECTOR
     # ============================================
+    # Experiment 1: Mixed gender (easy - may just detect gender)
+    # Experiment 2: Same gender male (tests true face recognition)
+    # Experiment 3: Same gender female (tests true face recognition)
+    
+    experiment = os.environ.get("EXPERIMENT", "1")
+    
+    if experiment == "1":
+        target_names = ["david", "laura"]
+        exp_name = "Mixed Gender (david vs laura)"
+        output_dir = args.output_dir
+    elif experiment == "2":
+        target_names = ["david", "michael"]
+        exp_name = "Same Gender Male (david vs michael)"
+        output_dir = args.output_dir.replace("2names", "2names_male")
+    elif experiment == "3":
+        target_names = ["maria", "laura"]
+        exp_name = "Same Gender Female (maria vs laura)"
+        output_dir = args.output_dir.replace("2names", "2names_female")
+    else:
     target_names = ["david", "laura"]
+        exp_name = "Mixed Gender (david vs laura)"
+        output_dir = args.output_dir
+    
+    # Override output dir if experiment changes
+    args.output_dir = output_dir
+    
     print(f"\n{'='*60}")
-    print(f"EXPERIMENT 1: Two-Name Sanity Check")
+    print(f"EXPERIMENT {experiment}: {exp_name}")
     print(f"Testing: {target_names}")
     print(f"{'='*60}\n")
     
@@ -293,6 +351,17 @@ def main():
     print(f"Training samples: {len(train_dataset)}")
     print(f"Validation samples: {len(val_dataset)}")
     print(f"Random baseline: 50% (2 classes)\n")
+    
+    # Always run zero-shot baseline first
+    print("Running zero-shot baseline (no fine-tuning)...")
+    zs_acc = zero_shot_baseline(
+        trainer.model, val_loader, target_names, trainer.tokenizer, device
+    )
+    print(f"Zero-shot accuracy: {zs_acc:.4f} ({zs_acc*100:.1f}%)\n")
+    
+    if args.zero_shot_only:
+        print("Zero-shot only mode, skipping training.")
+        return
     
     trainer.train(train_loader, val_loader, candidate_names=target_names)
 

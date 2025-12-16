@@ -17,3 +17,4 @@ images/
 entities.json
 .DS_Store
 .env
+.venv/
