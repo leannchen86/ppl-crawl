@@ -1,12 +1,19 @@
+# Python
 venv/
 __pycache__/
 *.pyc
 *.pyo
 .python-version
 
+# Face detection
 *.json
 *.pt
 *.log
 clip_checkpoints/
 exp1_2names/
+
+# ppl-crawl
 images/
+entities.json
+.DS_Store
+.env

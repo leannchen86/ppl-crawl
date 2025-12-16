@@ -1,33 +1,29 @@
-# Face Detection
+# ppl-crawl
 
-Face detection script using RetinaFace via [batch-face](https://github.com/elliottzheng/batch-face) for fast GPU batch inference.
+## Face Detection (CLIP Training)
 
-## Setup
+Face detection and CLIP fine-tuning for face-name association.
+
+### Setup
 
 ```bash
-# Create virtual environment
+cd face-detection
 python3 -m venv venv
 source venv/bin/activate
-
-# Install dependencies
 pip install -r requirements.txt
 ```
 
-## Usage
+### Usage
 
 ```bash
-# Activate venv
 source venv/bin/activate
-
-# Run detection (uses GPU 1 by default)
-python detect_faces.py
+python test_train_clip.py
 ```
 
-To use a different GPU, edit `CUDA_VISIBLE_DEVICES` in `detect_faces.py`.
+---
 
-## Requirements
+## Data Crawling (For Moo)
 
-- Python 3.10+
-- NVIDIA GPU with CUDA 11.8+ support
-- ~2GB GPU memory
-
+- Install Bun: `curl -fsSL https://bun.com/install | bash`
+- Get JSON data from Diffbot: `bun crawl.ts` (don't share that script; your API key is in it). This'll save into `entities.json`.
+- Get images data from entities.json: `bun crawl_img.ts` (change the range of entities pictures to crawl in that file, if needed). This'll save into `images/`.
