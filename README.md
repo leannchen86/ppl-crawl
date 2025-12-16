@@ -22,7 +22,7 @@ python test_train_clip.py
 
 ---
 
-## Data Crawling (For Moo)
+## Data Crawling
 
 - Install Bun: `curl -fsSL https://bun.com/install | bash`
 - Get JSON data from Diffbot: `bun crawl.ts` (don't share that script; your API key is in it). This'll save into `entities.json`.
