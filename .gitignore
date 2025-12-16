@@ -4,3 +4,9 @@ __pycache__/
 *.pyo
 .python-version
 
+*.json
+*.pt
+*.log
+clip_checkpoints/
+exp1_2names/
+images/
