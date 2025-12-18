@@ -7,8 +7,14 @@ type Entity = {
 type Resp = {
   data: Entity[];
 }
+
+const DIFFBOT_TOKEN = process.env.DIFFBOT_TOKEN;
+if (!DIFFBOT_TOKEN) {
+  throw new Error('DIFFBOT_TOKEN environment variable is required');
+}
+
 const size = 50000;
-const res = await fetch(`https://kg.diffbot.com/kg/v3/dql?type=query&token=d8f934b749507bc6a9939848e77b380c&query=type%3APerson%20has:image%20get:name,image,employments&size=${size}`)
+const res = await fetch(`https://kg.diffbot.com/kg/v3/dql?type=query&token=${DIFFBOT_TOKEN}&query=type%3APerson%20has:image%20get:name,image,employments&size=${size}`)
 const data = await res.json() as Resp;
 
 // Extract entities with job titles
