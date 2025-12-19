@@ -1,0 +1,179 @@
+Scope
+------------------------------------------------------------------------------
+This report summarizes the experiments and analyses performed so far to
+study whether a pretrained vision-language model (CLIP) contains learnable
+signal mapping faces to first names ("name vibes"), and why predictions are
+skewed toward a few names (e.g., William/Nick/Lisa).
+
+All numbers below are from artifacts in:
+  /home/leann/face-detection/results/
+
+1) Experimental Setup (Current 30-name benchmark)
+------------------------------------------------------------------------------
+- Names evaluated: 30 (see results/scale_up_results/names.json)
+- Evaluation type: multiclass classification, 30 classes
+- Training/eval style: linear classifier on frozen CLIP embeddings (linear probe)
+- Balanced sampling: approximately 500 train examples per name (and ~500 val per name)
+- Validation set size (from CSV supports): 14805
+
+2) Headline Result (30 names)
+------------------------------------------------------------------------------
+- Overall accuracy: 13.9%
+- Random baseline:  3.3% (1/30)
+- Absolute lift over random: 10.6%
+
+Interpretation:
+- 13.95% accuracy on 30-way classification is ~4.2× random. This indicates real
+  information is present in CLIP embeddings for this task, but it is weak and
+  uneven across names.
+
+3) Key Finding: Prediction Frequency Skew (Model favors a few names)
+------------------------------------------------------------------------------
+Even with balanced true label counts, the model predicts some names far more often.
+- True-label frequency CV (should be near 0 if balanced): 0.025
+- Predicted-label frequency CV (higher = more skew):       0.400
+
+Top predicted names (count of predictions):
+  - william      937 predictions  (pred/actual=1.87×)
+  - nick         831 predictions  (pred/actual=1.78×)
+  - emily        761 predictions  (pred/actual=1.52×)
+  - lisa         756 predictions  (pred/actual=1.57×)
+  - daniel       741 predictions  (pred/actual=1.48×)
+  - jessica      714 predictions  (pred/actual=1.43×)
+  - matt         636 predictions  (pred/actual=1.36×)
+  - ana          613 predictions  (pred/actual=1.23×)
+  - alex         611 predictions  (pred/actual=1.22×)
+  - mark         585 predictions  (pred/actual=1.17×)
+
+Supporting evidence (visual):
+  - results/scale_up_results/prediction_bias.png
+
+4) Precision/Recall/F1: What “William = 51%” actually means
+------------------------------------------------------------------------------
+Per-name "accuracy" in our earlier printouts is recall:
+  recall(name) = P(pred=name | true=name)
+
+Example: William
+  - Recall (sensitivity):   51.4%  (257/500 Williams correctly predicted)
+  - Precision (PPV):        27.4%  (257/937 William predictions correct)
+  - F1-score:               35.8%
+  - Prediction bias ratio:  1.87× (model predicts William ~1.87× as often as it appears)
+
+Interpretation:
+- William has the strongest recoverable signal in this 30-name set (highest recall/F1).
+- But William is also over-predicted (precision is much lower than recall).
+- Practically: the model “calls William” frequently; it catches many Williams,
+  but produces many false positives (non-William faces labeled William).
+
+Top 10 names by F1 (best overall precision/recall trade-off):
+  - william    F1=35.8%  P=27.4%  R=51.4%  pred/actual=1.87×
+  - lisa       F1=20.2%  P=16.5%  R=25.9%  pred/actual=1.57×
+  - emily      F1=18.1%  P=15.0%  R=22.8%  pred/actual=1.52×
+  - nick       F1=17.9%  P=14.0%  R=24.9%  pred/actual=1.78×
+  - ashley     F1=17.0%  P=15.8%  R=18.5%  pred/actual=1.17×
+  - daniel     F1=16.9%  P=14.2%  R=21.0%  pred/actual=1.48×
+  - mark       F1=16.2%  P=15.0%  R=17.6%  pred/actual=1.17×
+  - ana        F1=15.8%  P=14.4%  R=17.6%  pred/actual=1.23×
+  - sara       F1=15.2%  P=15.6%  R=14.8%  pred/actual=0.95×
+  - matt       F1=14.9%  P=12.9%  R=17.6%  pred/actual=1.36×
+
+Bottom 10 names by F1 (weakest or ignored):
+  - michael    F1=9.7%  P=12.0%  R=8.2%  pred/actual=0.69×
+  - julia      F1=9.5%  P=10.9%  R=8.4%  pred/actual=0.77×
+  - maria      F1=8.6%  P=11.6%  R=6.8%  pred/actual=0.58×
+  - thomas     F1=8.6%  P=13.0%  R=6.4%  pred/actual=0.49×
+  - david      F1=7.2%  P=10.0%  R=5.6%  pred/actual=0.56×
+  - nicole     F1=7.0%  P=9.9%  R=5.4%  pred/actual=0.55×
+  - andrea     F1=7.0%  P=8.3%  R=6.0%  pred/actual=0.72×
+  - amanda     F1=6.5%  P=9.8%  R=4.8%  pred/actual=0.49×
+  - sarah      F1=4.7%  P=6.3%  R=3.8%  pred/actual=0.61×
+  - james      F1=4.4%  P=10.1%  R=2.8%  pred/actual=0.28×
+
+Supporting evidence:
+  - results/scale_up_results/precision_recall_metrics.csv
+  - results/scale_up_results/precision_recall_scatter.png
+  - results/scale_up_results/top_confusions.png
+
+5) Debugging Bias: What we measured and what it implies (non-causal, yet useful)
+------------------------------------------------------------------------------
+We analyzed properties of the trained linear softmax head (weights/biases) and
+compared them against how often the head predicted each class.
+
+From results/bias_debug/bias_diagnostics.json:
+  - corr(||w_c||, predicted_count_c) = 0.609
+  - corr(b_c, predicted_count_c)     = 0.040
+
+Interpretation:
+- Prediction skew correlates strongly with weight-vector norm (scale) and very weakly
+  with bias term. This matches known softmax geometry: larger ||w_c|| tends to
+  produce larger logits and win more argmax decisions.
+
+Important limitation (causality):
+- This correlation alone does NOT prove whether the skew is due to “true signal”
+  differences vs optimization artifacts. It is partly self-referential because the
+  same weights generate the predictions. A causal version requires controls (e.g.,
+  cosine classifier / weight-norm constraint; permutation tests).
+
+6) Visualization evidence for “signal exists but clusters overlap”
+------------------------------------------------------------------------------
+The embedding space shows weak separation: same-name pairs are, on average,
+more similar than different-name pairs, but with heavy overlap.
+
+Supporting evidence (visual):
+  - results/embedding_analysis/similarity_distributions.png
+  - results/embedding_analysis/per_class_accuracy.png
+  - results/scale_up_results/lda_projection.png  (2D discriminative projection)
+  - results/scale_up_results/confusion_heatmap.png
+  - results/scale_up_results/roc_curves.png
+
+7) Lessons learned (why we chose the current approach)
+------------------------------------------------------------------------------
+1) Mixed-gender pairs can look “solved” because gender→name is an easy shortcut.
+   → We moved to same-gender tests and multiclass scaling.
+2) Full fine-tuning tended to overfit / degrade generalization (catastrophic forgetting).
+   → We adopted frozen-embedding + linear probe as a stable baseline.
+3) Accuracy alone is insufficient for this task.
+   → We added per-name precision/recall/F1, prediction frequency bias, and confusion analyses.
+4) “Model favors a few names” is an expected failure mode in softmax heads on weak-signal tasks.
+   → We instrumented the head (weight norms, priors) to quantify the skew.
+
+8) Actionable next steps (rigorous bias debugging before moving on)
+------------------------------------------------------------------------------
+If the goal is a fair 30-name model (not dominated by a few names), the next
+technical step is to run causal stress tests that separate:
+  (A) optimization/softmax artifacts  vs  (B) real separability differences
+
+Recommended tests:
+  1) Cosine classifier / weight normalization head (equal ||w_c||)
+     - Compare: overall accuracy, per-name F1, prediction skew CV
+     - If skew drops while accuracy holds → skew largely norm-driven
+  2) Permutation test (shuffle labels, retrain)
+     - If correlations persist under shuffled labels → artifact
+  3) Logit decomposition per class
+     - Separate effects of bias term, weight norm, and alignment with embeddings
+  4) Prior/logit adjustment using true class priors (NOT prediction frequency)
+     - Evaluate skew vs accuracy trade-off without retraining
+  5) Confound probes via proxies
+     - Per-name blur/brightness/face-size/pose estimates to see if “easy names”
+       are proxies for photographic quality or demographic skews
+
+Once the bias story is causal and under control, testing “distinctive names only”
+becomes more meaningful (it will measure the phenomenon, not head geometry).
+
+Appendix: Where to find supporting outputs
+------------------------------------------------------------------------------
+Core metrics:
+  - results/scale_up_results/precision_recall_metrics.csv
+  - results/scale_up_results/rankings.csv
+
+Bias debugging artifact:
+  - results/bias_debug/bias_diagnostics.json
+
+Key visuals:
+  - results/scale_up_results/prediction_bias.png
+  - results/scale_up_results/precision_recall_scatter.png
+  - results/scale_up_results/top_confusions.png
+  - results/scale_up_results/roc_curves.png
+  - results/scale_up_results/confusion_heatmap.png
+  - results/scale_up_results/lda_projection.png
+  - results/embedding_analysis/similarity_distributions.png
