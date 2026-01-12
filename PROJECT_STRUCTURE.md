@@ -38,9 +38,16 @@ face-detection/
 │   └── experiment_2names_male/   # 2-name experiment (male)
 │
 ├── results/              # Analysis results and visualizations
-│   ├── scale_up_results/         # Scale-up test results
+│   ├── scale_up_results/         # Scale-up test results (baseline)
 │   ├── embedding_analysis/       # Embedding analysis outputs
-│   └── bias_debug/               # Bias debugging results
+│   ├── bias_debug/               # Bias debugging results
+│   ├── ablations/                # Ablation test results
+│   │   ├── no_william/           # Remove William ablation
+│   │   └── no_top3/              # Remove top-3 names ablation
+│   ├── cosine_classifier/        # Normalized weight experiments
+│   ├── permutation_test/         # Shuffled label experiments
+│   ├── confound_analysis/        # Photo quality confound analysis
+│   └── phase1_comprehensive_report.md  # Phase 1 summary
 │
 ├── logs/                 # Log files and runtime data
 │   ├── detect_faces_full_run.log
@@ -78,6 +85,22 @@ All scripts have been updated to use the new directory structure:
 - When running scripts, they will use the new paths by default
 - To override paths, use command-line arguments (e.g., `--index-dir`, `--output-dir`)
 - All existing functionality preserved with updated file locations
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
