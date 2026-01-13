@@ -22,14 +22,17 @@ Run multiple quick experiments with different embedding models and training appr
 
 ## Data Available
 
+### Location (CANONICAL - Use This)
 ```
-/home/leann/face-detection/data/index_files/          # Original images
-/home/leann/face-detection/data/index_files_facechips512_m0.5_reflect/  # 512x512 face chips
+/home/leann/face-detection/data/index_files_facechips512_m0.5_reflect/
 ```
 
-- **Total images:** 434,528
+This contains 512x512 face chips with reflect padding and 0.5 margin.
+
+- **Total images:** 445,356
 - **Total names:** 500
-- **Names with >200 images:** 437
+- **Image size:** 512x512 (standardized)
+- **Names with >200 images:** ~440
 
 ---
 

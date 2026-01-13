@@ -25,17 +25,19 @@ Train a model to learn "name vibes" - the subtle statistical correlations betwee
 
 ## Data Available
 
-### Location
+### Location (CANONICAL - Use This)
 ```
-/home/leann/face-detection/data/index_files/          # Original images
-/home/leann/face-detection/data/index_files_facechips512_m0.5_reflect/  # Face chips
+/home/leann/face-detection/data/index_files_facechips512_m0.5_reflect/
 ```
 
+This contains 512x512 face chips with reflect padding and 0.5 margin.
+
 ### Statistics
-- **Total images:** 434,528 (good quality, single face detected)
+- **Total images:** 445,356
 - **Total names:** 500
+- **Image size:** 512x512 (standardized)
 - **Distribution:** Highly unbalanced
-  - Top: alex (5,960), david (5,674), michael (4,801)
+  - Top: alex (6,149), david (5,823), michael (~4,900)
   - Bottom: ~200 images per name
 
 ### Index File Format

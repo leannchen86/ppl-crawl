@@ -18,15 +18,25 @@ This project is running **3 parallel experiment tracks** in separate chat branch
 
 ## Shared Context
 
-### Data Location
+### Data Location (CANONICAL)
 ```
-/home/leann/face-detection/data/index_files/                          # Original images
-/home/leann/face-detection/data/index_files_facechips512_m0.5_reflect/  # 512x512 face chips
+/home/leann/face-detection/data/index_files_facechips512_m0.5_reflect/
+```
+
+**All tracks MUST use this dataset** for fair comparison. This contains:
+- 512x512 face chips (standardized, face-focused)
+- Reflect padding (no black borders)
+- 0.5 margin around detected face
+
+Alternative (DO NOT USE for main experiments):
+```
+/home/leann/face-detection/data/index_files/  # Original variable-size images
 ```
 
 ### Data Statistics
-- **Total images:** 434,528
+- **Total images:** 445,356
 - **Total names:** 500
+- **Image size:** 512x512 (all standardized)
 - **Split:** 80% train / 20% val (by hash for reproducibility)
 
 ### Baseline Performance (for comparison)

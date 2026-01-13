@@ -25,26 +25,28 @@ Train a Vision Transformer from scratch on our full 435k face dataset to learn f
 
 ## Data Available
 
-### Location
+### Location (CANONICAL - Use This)
 ```
-/home/leann/face-detection/data/index_files/          # Original images
-/home/leann/face-detection/data/index_files_facechips512_m0.5_reflect/  # 512x512 face chips (recommended)
+/home/leann/face-detection/data/index_files_facechips512_m0.5_reflect/
 ```
+
+This contains 512x512 face chips with reflect padding and 0.5 margin.
 
 ### Statistics
-- **Total images:** 434,528
+- **Total images:** 445,356
 - **Total names (classes):** 500
+- **Image size:** 512x512 (standardized)
 - **Distribution:** Highly unbalanced (power law)
   ```
-  Top 10: alex(5960), david(5674), michael(4801), laura(4645), sarah(4473),
-          daniel(4217), john(3794), chris(3782), james(3736), amanda(3428)
+  Top 10: alex(6149), david(5823), michael(~4900), laura(~4700), sarah(~4500),
+          daniel(~4300), john(~3900), chris(~3800), james(~3800), amanda(~3500)
 
-  Names with >1000 images: 153
-  Names with >500 images: 283
-  Names with >200 images: 437
+  Names with >1000 images: ~155
+  Names with >500 images: ~285
+  Names with >200 images: ~440
   ```
 
-### Recommended: Use ALL 435k images
+### Use ALL 445k images
 - Don't balance - use natural distribution with class-weighted loss
 - This gives model maximum signal to learn from
 - Weight minority classes higher to prevent ignoring them
