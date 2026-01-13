@@ -194,7 +194,10 @@ def main():
                         help="Use equal samples per name")
     parser.add_argument("--max-per-name", type=int, default=500,
                         help="Max samples per name (for balanced mode)")
-    parser.add_argument("--index-dir", default="/home/leann/face-detection/data/index_files")
+    parser.add_argument(
+        "--index-dir",
+        default="/home/leann/face-detection/data/index_files_facechips512_filtered_score0.9_bbox32_areafrac0.001",
+    )
     parser.add_argument("--output-dir", default="./scale_up_results")
     args = parser.parse_args()
     

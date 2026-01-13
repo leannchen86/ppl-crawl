@@ -22,7 +22,8 @@ face-detection/
 │   └── data_analysis.ipynb       # Data analysis notebook
 │
 ├── data/                 # All data files
-│   ├── index_files/              # Face detection index files (500 files)
+│   ├── index_files_facechips512_filtered_score0.9_bbox32_areafrac0.001/  # Primary training index (filtered face chips)
+│   ├── deprecated_index_dirs_2026-01-13/  # Deprecated index directories (do not use)
 │   ├── entities_30k.json         # Entity data (30k)
 │   ├── entities_50k.json         # Entity data (50k)
 │   ├── first_names_50k.txt       # Extracted first names
@@ -67,7 +68,7 @@ face-detection/
 
 1. **Organized scripts**: All Python scripts moved to `scripts/` folder
 2. **Consolidated data**: All data files (JSON, TXT, CSV) moved to `data/` folder
-3. **Index files**: 500 `index_*.json` files organized in `data/index_files/`
+3. **Index files**: Primary `index_*.json` files live in `data/index_files_facechips512_filtered_score0.9_bbox32_areafrac0.001/` (filtered face-chip dataset)
 4. **Experiments**: All checkpoint folders moved to `experiments/` with clearer naming
 5. **Results**: All analysis results consolidated in `results/` folder
 6. **Logs**: Runtime logs and reports moved to `logs/` folder
@@ -76,7 +77,7 @@ face-detection/
 ## Updated Script Paths
 
 All scripts have been updated to use the new directory structure:
-- `index_dir` defaults now point to `data/index_files/`
+- `index_dir` defaults now point to `data/index_files_facechips512_filtered_score0.9_bbox32_areafrac0.001/`
 - `output_dir` defaults point to `experiments/` subdirectories
 - Data file paths updated to use `data/` folder
 

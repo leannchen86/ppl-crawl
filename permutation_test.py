@@ -231,7 +231,7 @@ def main():
     p = argparse.ArgumentParser()
     p.add_argument(
         "--index-dir",
-        default="/home/leann/face-detection/data/index_files",
+        default="/home/leann/face-detection/data/index_files_facechips512_filtered_score0.9_bbox32_areafrac0.001",
     )
     p.add_argument("--names-json", default="/home/leann/face-detection/results/scale_up_results/names.json")
     p.add_argument("--tag", default="permuted_labels")

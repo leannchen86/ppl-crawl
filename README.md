@@ -35,7 +35,7 @@ Then, point any training/analysis script at the new index directory, e.g.:
 
 ```bash
 source /home/leann/face-detection/venv/bin/activate
-python /home/leann/face-detection/scripts/scale_up_test.py --index-dir /home/leann/face-detection/data/index_files_facechips512_m0.5_reflect --balanced
+python /home/leann/face-detection/scripts/scale_up_test.py --index-dir /home/leann/face-detection/data/index_files_facechips512_filtered_score0.9_bbox32_areafrac0.001 --balanced
 ```
 
 ---

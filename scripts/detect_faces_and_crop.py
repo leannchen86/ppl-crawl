@@ -398,8 +398,8 @@ def main() -> None:
     )
     p.add_argument(
         "--index-output-dir",
-        default="/home/leann/face-detection/data/index_files_facechips512_m0.5_reflect",
-        help="Where to write index_<name>.json files pointing to the face chips.",
+        default="/home/leann/face-detection/data/deprecated_index_dirs_2026-01-13/index_files_facechips512_m0.5_reflect_unfiltered",
+        help="Where to write index_<name>.json files pointing to the face chips (unfiltered; stored under data/deprecated_*).",
     )
     p.add_argument("--threshold", type=float, default=0.9)
     p.add_argument("--batch-size", type=int, default=32)

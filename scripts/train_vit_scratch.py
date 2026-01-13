@@ -416,7 +416,7 @@ def main():
 
     # Data
     parser.add_argument("--index-dir", type=str,
-                        default="/home/leann/face-detection/data/index_files_facechips512_m0.5_reflect",
+                        default="/home/leann/face-detection/data/index_files_facechips512_filtered_score0.9_bbox32_areafrac0.001",
                         help="Directory with index files")
     parser.add_argument("--num-names", type=int, default=500,
                         help="Number of names/classes to use")

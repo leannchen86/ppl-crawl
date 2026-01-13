@@ -20,7 +20,7 @@ This project is running **3 parallel experiment tracks** in separate chat branch
 
 ### Data Location (CANONICAL)
 ```
-/home/leann/face-detection/data/index_files_facechips512_m0.5_reflect/
+/home/leann/face-detection/data/index_files_facechips512_filtered_score0.9_bbox32_areafrac0.001/
 ```
 
 **All tracks MUST use this dataset** for fair comparison. This contains:
@@ -30,7 +30,7 @@ This project is running **3 parallel experiment tracks** in separate chat branch
 
 Alternative (DO NOT USE for main experiments):
 ```
-/home/leann/face-detection/data/index_files/  # Original variable-size images
+/home/leann/face-detection/data/deprecated_index_dirs_2026-01-13/index_files_og/  # Original variable-size images (deprecated)
 ```
 
 ### Data Statistics

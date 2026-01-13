@@ -27,7 +27,7 @@ Train a model to learn "name vibes" - the subtle statistical correlations betwee
 
 ### Location (CANONICAL - Use This)
 ```
-/home/leann/face-detection/data/index_files_facechips512_m0.5_reflect/
+/home/leann/face-detection/data/index_files_facechips512_filtered_score0.9_bbox32_areafrac0.001/
 ```
 
 This contains 512x512 face chips with reflect padding and 0.5 margin.
@@ -191,3 +191,129 @@ When done, update:
    - Prediction CV (coefficient of variation)
    - Top 5 / Bottom 5 names by F1
    - Training time and GPU memory used
+
+---
+
+## Scripts Created
+
+The following scripts have been created for this track:
+
+### 1. Data Preparation (`scripts/prepare_qwen_dataset.py`)
+Converts index files to Qwen VL compatible format.
+
+```bash
+# Quick test with top 30 names
+python scripts/prepare_qwen_dataset.py \
+    --index-dir data/index_files_facechips512_filtered_score0.9_bbox32_areafrac0.001 \
+    --output-dir data/qwen_dataset_30names \
+    --format classification \
+    --top-n-names 30 \
+    --max-per-name 1000
+
+# Full dataset
+python scripts/prepare_qwen_dataset.py \
+    --index-dir data/index_files_facechips512_filtered_score0.9_bbox32_areafrac0.001 \
+    --output-dir data/qwen_dataset_full \
+    --format classification
+```
+
+### 2. Training (`scripts/train_qwen_vl.py`)
+Qwen 2.5 VL fine-tuning with classification head + optional LoRA.
+
+```bash
+# Recommended: 7B model with classification head
+python scripts/train_qwen_vl.py \
+    --model-id Qwen/Qwen2.5-VL-7B-Instruct \
+    --data-dir data/qwen_dataset_30names \
+    --output-dir results/track1_qwen_vl/7b_classification \
+    --use-4bit \
+    --freeze-vision \
+    --class-balanced-beta 0.999 \
+    --epochs 3
+```
+
+### 3. Evaluation (`scripts/evaluate_qwen_vl.py`)
+Generates standardized results for comparison with CLIP baseline.
+
+```bash
+python scripts/evaluate_qwen_vl.py infer \
+    --checkpoint-dir results/track1_qwen_vl/7b_classification/checkpoint_epoch_3 \
+    --data-dir data/qwen_dataset_30names \
+    --output-dir results/track1_qwen_vl/7b_classification
+```
+
+### 4. Run Script (`scripts/run_track1_qwen.sh`)
+Convenience script for running the full pipeline.
+
+```bash
+# Install dependencies
+./scripts/run_track1_qwen.sh install_deps
+
+# Run quick test (3B model, faster)
+./scripts/run_track1_qwen.sh run_quick_test
+
+# Run full pipeline (7B model)
+./scripts/run_track1_qwen.sh run_full_pipeline
+```
+
+---
+
+## Next Steps
+
+### Immediate Actions
+1. **Install dependencies:**
+   ```bash
+   pip install transformers accelerate bitsandbytes peft trl qwen-vl-utils
+   ```
+
+2. **Prepare dataset (start with 30 names for comparison):**
+   ```bash
+   python scripts/prepare_qwen_dataset.py \
+       --index-dir data/index_files_facechips512_filtered_score0.9_bbox32_areafrac0.001 \
+       --top-n-names 30 \
+       --max-per-name 1000 \
+       --output-dir data/qwen_dataset_30names
+   ```
+
+3. **Run quick test with 3B model:**
+   ```bash
+   ./scripts/run_track1_qwen.sh train_classification_3b
+   ```
+
+### Experiment Priority Order
+1. **3B Classification (Sanity Check)** - Fast iteration, ~2-4 hours
+   - Validates pipeline works
+   - Establishes baseline for VL approach
+
+2. **7B Classification** - Main experiment, ~6-12 hours
+   - Should show improvement over 3B
+   - Compare to CLIP's 13.9% on top 30 names
+
+3. **7B + LoRA** - If classification head alone insufficient
+   - Fine-tune LLM backbone
+   - May capture more nuanced patterns
+
+4. **Multiple Choice Format** - If classification struggles
+   - Easier task (5-way choice vs 30/500-way)
+   - Good for validating model understands the task
+
+### Expected GPU Requirements
+| Model | VRAM (4-bit) | Batch Size | Est. Time (30 names, 1000/name) |
+|-------|--------------|------------|--------------------------------|
+| 3B | ~8GB | 8 | 2-4 hours |
+| 7B | ~18GB | 4 | 6-12 hours |
+| 72B | Multi-GPU | 1 | Days |
+
+### Success Criteria Checklist
+- [ ] Pipeline runs end-to-end without errors
+- [ ] Training loss decreases over epochs
+- [ ] Validation accuracy > random baseline (3.3% for 30 names)
+- [ ] Top-30 accuracy > 13.9% (CLIP baseline)
+- [ ] Prediction CV < 0.40 (more balanced predictions)
+- [ ] Results saved in standardized format
+
+### Troubleshooting
+- **OOM errors:** Reduce batch size, increase gradient accumulation
+- **Slow training:** Use 3B model first, or reduce max_per_name
+- **Poor accuracy:** Try LoRA, adjust learning rate, add more epochs
+- **Prediction skew:** Increase class_balanced_beta (0.999 → 0.9999)

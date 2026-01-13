@@ -367,7 +367,7 @@ def create_multiple_choice_dataset(
 
 def main():
     parser = argparse.ArgumentParser(description="Prepare dataset for Qwen 2.5 VL fine-tuning")
-    parser.add_argument("--index-dir", default="/home/leann/face-detection/data/index_files_facechips512_m0.5_reflect",
+    parser.add_argument("--index-dir", default="/home/leann/face-detection/data/index_files_facechips512_filtered_score0.9_bbox32_areafrac0.001",
                         help="Directory containing index_*.json files")
     parser.add_argument("--output-dir", default="/home/leann/face-detection/data/qwen_dataset",
                         help="Output directory for processed dataset")

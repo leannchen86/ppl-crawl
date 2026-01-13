@@ -7,7 +7,7 @@ set -e  # Exit on error
 PROJECT_DIR="/home/leann/face-detection"
 DATA_DIR="$PROJECT_DIR/data"
 # Canonical data: 512x512 face chips with reflect padding
-INDEX_DIR="$DATA_DIR/index_files_facechips512_m0.5_reflect"
+INDEX_DIR="$DATA_DIR/index_files_facechips512_filtered_score0.9_bbox32_areafrac0.001"
 RESULTS_DIR="$PROJECT_DIR/results/track1_qwen_vl"
 SCRIPTS_DIR="$PROJECT_DIR/scripts"
 

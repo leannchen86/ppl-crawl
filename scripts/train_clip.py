@@ -313,7 +313,11 @@ def main():
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--deterministic", action="store_true", help="Enable strict deterministic algorithms")
     parser.add_argument("--num-workers", type=int, default=4)
-    parser.add_argument("--index-dir", default="/home/leann/face-detection/data/index_files", help="Directory containing index_*.json files")
+    parser.add_argument(
+        "--index-dir",
+        default="/home/leann/face-detection/data/index_files_facechips512_filtered_score0.9_bbox32_areafrac0.001",
+        help="Directory containing index_*.json files",
+    )
     parser.add_argument("--device", default=None, help="e.g. cuda, cuda:0, cpu (default: auto)")
     parser.add_argument("--log-every", type=int, default=25)
     parser.add_argument("--output-dir", default="./experiments/clip_checkpoints")

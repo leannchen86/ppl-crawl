@@ -247,7 +247,7 @@ def main():
     p = argparse.ArgumentParser()
     p.add_argument(
         "--index-dir",
-        default="/home/leann/face-detection/data/index_files",
+        default="/home/leann/face-detection/data/index_files_facechips512_filtered_score0.9_bbox32_areafrac0.001",
         help="Directory containing per-name index files like index_<name>.json",
     )
     p.add_argument("--names-json", default="/home/leann/face-detection/results/scale_up_results/names.json")
@@ -296,12 +296,19 @@ def main():
     index_dir = Path(args.index_dir).expanduser()
     if not index_dir.is_dir():
         suggestions = []
-        repo_default = Path(__file__).resolve().parent / "data" / "index_files"
+        repo_default = (
+            Path(__file__).resolve().parent
+            / "data"
+            / "index_files_facechips512_filtered_score0.9_bbox32_areafrac0.001"
+        )
         if repo_default.is_dir():
             suggestions.append(str(repo_default))
-        hardcoded_default = Path("/home/leann/face-detection/data/index_files")
+        hardcoded_default = Path("/home/leann/face-detection/data/index_files_facechips512_filtered_score0.9_bbox32_areafrac0.001")
         if hardcoded_default.is_dir() and str(hardcoded_default) not in suggestions:
             suggestions.append(str(hardcoded_default))
+        deprecated_og = Path("/home/leann/face-detection/data/deprecated_index_dirs_2026-01-13/index_files_og")
+        if deprecated_og.is_dir() and str(deprecated_og) not in suggestions:
+            suggestions.append(str(deprecated_og))
         msg = f"--index-dir is not a directory: {index_dir}"
         if suggestions:
             msg += "\nDid you mean one of:\n  - " + "\n  - ".join(suggestions)
@@ -347,7 +354,7 @@ def main():
         if train_ds.stats["index_files_found"] == 0:
             print("Cause: no index_<name>.json files were found for the requested names.")
             print("Fix: point --index-dir at the folder containing index_<name>.json files.")
-            print("Example: /home/leann/face-detection/data/index_files")
+            print("Example: /home/leann/face-detection/data/index_files_facechips512_filtered_score0.9_bbox32_areafrac0.001")
         elif train_ds.stats["selected_paths_total"] > 0 and train_ds.stats["selected_paths_exist"] == 0:
             print("Cause: index files were found, but none of the selected image paths exist on disk.")
             print("Fix: check that /home/leann/ppl-images is present and paths in index files are still valid.")

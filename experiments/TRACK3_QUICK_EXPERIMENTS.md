@@ -24,7 +24,7 @@ Run multiple quick experiments with different embedding models and training appr
 
 ### Location (CANONICAL - Use This)
 ```
-/home/leann/face-detection/data/index_files_facechips512_m0.5_reflect/
+/home/leann/face-detection/data/index_files_facechips512_filtered_score0.9_bbox32_areafrac0.001/
 ```
 
 This contains 512x512 face chips with reflect padding and 0.5 margin.

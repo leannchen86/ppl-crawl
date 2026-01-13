@@ -287,7 +287,7 @@ def main():
     parser.add_argument("--use-focal-loss", action="store_true",
                         help="Use focal loss instead of cross-entropy")
     parser.add_argument("--index-dir",
-                        default="/home/leann/face-detection/data/index_files_facechips512_m0.5_reflect")
+                        default="/home/leann/face-detection/data/index_files_facechips512_filtered_score0.9_bbox32_areafrac0.001")
     parser.add_argument("--quality-csv",
                         default="/home/leann/face-detection/results/confound_analysis/quality_metrics.csv")
     parser.add_argument("--output-dir",

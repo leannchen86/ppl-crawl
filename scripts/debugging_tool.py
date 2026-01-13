@@ -364,7 +364,10 @@ def compute_per_class_auc(logits, labels, num_classes):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--num-names", type=int, default=30)
-    parser.add_argument("--index-dir", default="/home/leann/face-detection/data/index_files")
+    parser.add_argument(
+        "--index-dir",
+        default="/home/leann/face-detection/data/index_files_facechips512_filtered_score0.9_bbox32_areafrac0.001",
+    )
     parser.add_argument("--output-dir", default="./rigorous_bias_debug")
     parser.add_argument("--seed", type=int, default=42)
     args = parser.parse_args()

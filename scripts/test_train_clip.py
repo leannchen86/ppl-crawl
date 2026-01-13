@@ -253,7 +253,10 @@ def main():
     parser.add_argument("--batch-size", type=int, default=64)
     parser.add_argument("--epochs", type=int, default=20)
     parser.add_argument("--seed", type=int, default=42)
-    parser.add_argument("--index-dir", default="/home/leann/face-detection/data/index_files")
+    parser.add_argument(
+        "--index-dir",
+        default="/home/leann/face-detection/data/index_files_facechips512_filtered_score0.9_bbox32_areafrac0.001",
+    )
     parser.add_argument("--output-dir", default="./experiments/experiment_2names_all")
     parser.add_argument("--zero-shot-only", action="store_true", help="Only run zero-shot baseline")
     args = parser.parse_args()
@@ -283,7 +286,7 @@ def main():
         exp_name = "Same Gender Female (maria vs laura)"
         output_dir = args.output_dir.replace("2names", "2names_female")
     else:
-    target_names = ["david", "laura"]
+        target_names = ["david", "laura"]
         exp_name = "Mixed Gender (david vs laura)"
         output_dir = args.output_dir
     

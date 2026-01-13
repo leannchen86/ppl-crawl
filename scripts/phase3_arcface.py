@@ -212,7 +212,7 @@ def main():
     parser.add_argument("--min-samples", type=int, default=200)
     parser.add_argument("--max-per-name", type=int, default=500)
     parser.add_argument("--index-dir",
-                        default="/home/leann/face-detection/data/index_files_facechips512_m0.5_reflect")
+                        default="/home/leann/face-detection/data/index_files_facechips512_filtered_score0.9_bbox32_areafrac0.001")
     parser.add_argument("--output-dir", default="./results/phase3_arcface")
     args = parser.parse_args()
 

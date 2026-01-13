@@ -216,7 +216,10 @@ def main():
     parser.add_argument("--names", nargs="+", default=None)
     parser.add_argument("--batch-size", type=int, default=64)
     parser.add_argument("--seed", type=int, default=42)
-    parser.add_argument("--index-dir", default="/home/leann/face-detection/data/index_files")
+    parser.add_argument(
+        "--index-dir",
+        default="/home/leann/face-detection/data/index_files_facechips512_filtered_score0.9_bbox32_areafrac0.001",
+    )
     parser.add_argument("--output-dir", default="./embedding_analysis")
     args = parser.parse_args()
     
