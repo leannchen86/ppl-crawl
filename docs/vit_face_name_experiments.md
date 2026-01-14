@@ -4,7 +4,7 @@
 Train a Vision Transformer from scratch to classify face images by first name. Test whether there's a learnable correlation between facial features and names.
 
 ## Dataset
-- Source: `data/index_files_facechips512_filtered_score0.9_bbox32_areafrac0.001/`
+- Source: `data/index_files/`
 - Curated face chips (512x512) filtered by detection score ≥ 0.9
 - 500 total classes (first names), ~396k images
 - Train/test split: 50/50 (first half / second half per class)
@@ -74,6 +74,19 @@ Train a Vision Transformer from scratch to classify face images by first name. T
 - **Random baseline**: 0.33% (1/304)
 - **Best**: 2.6% = 7.9x better than random
 - **Conclusion**: Signal persists without gender! Correlation is real.
+
+### Experiment 7: Muon Optimizer (failed)
+- **Purpose**: Test if Muon optimizer improves convergence
+- **Setup**: Muon for 2D weight matrices, AdamW for 1D params (biases, LayerNorm)
+- **Results**:
+  ```
+  LR=0.02:   Epoch 20: Train 4.2%, Test 1.8%  (baseline: 2.6%)
+  LR=0.002:  Epoch 20: Train 24.2%, Test 1.7% (worse)
+  LR=0.0005: Epoch 20: Train 3.6%, Test 2.4%  (close)
+             Epoch 40: Train 25.2%, Test 1.6% (crashed)
+  ```
+- **Conclusion**: Muon overfits faster than AdamW regardless of LR tuning. Even when epoch 20 looks comparable, it degrades rapidly after. Muon is designed for large-scale training (GPT-2, CIFAR speedruns) where fast convergence matters. For small noisy datasets like ours, AdamW's conservative updates are more stable.
+- **Recommendation**: Stick with AdamW for this task.
 
 ## Key Findings
 

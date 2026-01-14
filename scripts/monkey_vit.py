@@ -21,7 +21,7 @@ def load_names_from_file(filepath):
     return names
 
 # Hardcoded config
-INDEX_DIR = "data/index_files_facechips512_filtered_score0.9_bbox32_areafrac0.001"
+INDEX_DIR = "data/index_files"
 NAMES_FILE = "data/male_names.txt"  # Male-only names for gender-controlled experiment
 EPOCHS = 100
 BATCH_SIZE = 1024
