@@ -28,7 +28,7 @@ BATCH_SIZE = 1024
 LR = 1e-4  # Lower LR to reduce instability
 NUM_WORKERS = 8
 LOG_FILE = "monkey_vit_log.txt"
-EVAL_EVERY = 20
+EVAL_EVERY = 10
 
 
 class FaceDataset(Dataset):
@@ -125,6 +125,7 @@ def main():
         train_acc = correct / total * 100
 
         # Evaluate every EVAL_EVERY epochs
+        test_acc = None
         if epoch % EVAL_EVERY == 0 or epoch == 1:
             model.eval()
             correct = 0
@@ -138,10 +139,14 @@ def main():
                     total += labels.size(0)
             test_acc = correct / total * 100
 
+        # Log every epoch
+        if test_acc is not None:
             line = f"Epoch {epoch:3d} | Loss: {avg_loss:.4f} | Train: {train_acc:.1f}% | Test: {test_acc:.1f}%"
-            print(line)
-            log_f.write(f"{epoch},{avg_loss:.6f},{train_acc:.1f},{test_acc:.1f}\n")
-            log_f.flush()
+        else:
+            line = f"Epoch {epoch:3d} | Loss: {avg_loss:.4f} | Train: {train_acc:.1f}%"
+        print(line)
+        log_f.write(f"{epoch},{avg_loss:.6f},{train_acc:.1f},{test_acc if test_acc else ''}\n")
+        log_f.flush()
 
     log_f.close()
     print(f"\nTraining complete. Log saved to {LOG_FILE}")
