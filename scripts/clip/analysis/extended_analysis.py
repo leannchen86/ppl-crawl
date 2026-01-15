@@ -11,7 +11,7 @@ Additional analyses beyond the basic visualizations:
 7. Silhouette scores (cluster quality)
 
 Usage:
-    python extended_analysis.py --input-dir ./scale_up_results
+    python scripts/clip/analysis/extended_analysis.py --input-dir ./scale_up_results
 """
 import argparse
 import json
@@ -37,7 +37,7 @@ from clip_dataset import create_name_gender_mapping
 
 
 def load_data(input_dir):
-    """Load saved data from scale_up_test."""
+    """Load saved data from clip_scale_up_probe outputs."""
     predictions = np.load(os.path.join(input_dir, "predictions.npy"))
     true_labels = np.load(os.path.join(input_dir, "true_labels.npy"))
     embeddings = np.load(os.path.join(input_dir, "val_embeddings.npy"))
@@ -611,7 +611,7 @@ def generate_summary_report(results, output_path):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--input-dir", default="./scale_up_results",
-                        help="Directory with scale_up_test.py outputs")
+                        help="Directory with clip_probe_30way_scaleup.py outputs")
     parser.add_argument("--output-dir", default=None,
                         help="Output directory (defaults to input-dir)")
     args = parser.parse_args()
@@ -629,7 +629,7 @@ def main():
         predictions, true_labels, embeddings, names = load_data(args.input_dir)
     except FileNotFoundError as e:
         print(f"Error: Could not find data files in {args.input_dir}")
-        print("Please run scale_up_test.py first!")
+        print("Please run scripts/clip/clip_probe_30way_scaleup.py first!")
         return
     
     print(f"Loaded {len(embeddings)} embeddings for {len(names)} names")

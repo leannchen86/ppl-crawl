@@ -18,9 +18,12 @@ set -e
 
 # Configuration
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
+PROJECT_DIR="$(dirname "$(dirname "$SCRIPT_DIR")")"
 RESULTS_BASE="$PROJECT_DIR/results/track2_vit_scratch"
 TRAIN_SCRIPT="$SCRIPT_DIR/train_vit_scratch.py"
+
+# Ensure relative paths (and imports, if any) resolve from project root
+cd "$PROJECT_DIR"
 
 # Hyperparameters (adjust based on GPU memory)
 BATCH_SIZE=128  # Use 256 if you have 40GB+ VRAM

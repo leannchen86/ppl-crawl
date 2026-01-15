@@ -390,7 +390,7 @@ def process_person(
 
 def main() -> None:
     p = argparse.ArgumentParser()
-    p.add_argument("--ppl-images-dir", default="/home/leann/ppl-images")
+    p.add_argument("--ppl-images-dir", default="/home/leann/face-detection/data/original ppl images")
     p.add_argument(
         "--faces-output-dir",
         default="/home/leann/face-detection/data/face_chips_512_m0.5_reflect",

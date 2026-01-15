@@ -15,12 +15,13 @@ Key Tests:
 - Image quality proxy correlations
 
 Usage:
-    python rigorous_bias_debug.py --num-names 30
+    python scripts/clip/analysis/rigorous_bias_debug.py --num-names 30
 """
 import argparse
 import json
 import os
 import random
+import glob
 import numpy as np
 import torch
 import torch.nn as nn
@@ -42,6 +43,26 @@ def seed_everything(seed=42):
     torch.manual_seed(seed)
     if torch.cuda.is_available():
         torch.cuda.manual_seed_all(seed)
+
+
+def discover_names(index_dir: str, min_samples: int = 100):
+    """Find all names with enough samples (from index_*.json files)."""
+    names_with_counts = []
+
+    pattern = os.path.join(index_dir, "index_*.json")
+    for filepath in glob.glob(pattern):
+        name = os.path.basename(filepath).replace("index_", "").replace(".json", "")
+        try:
+            with open(filepath) as f:
+                data = json.load(f)
+            count = data.get("counts", {}).get("good", 0)
+            if count >= min_samples:
+                names_with_counts.append((name, count))
+        except Exception as e:
+            print(f"Warning: Could not read {filepath}: {e}")
+
+    names_with_counts.sort(key=lambda x: -x[1])
+    return names_with_counts
 
 
 class MultiNameDataset(torch.utils.data.Dataset):
@@ -381,7 +402,6 @@ def main():
     print("="*70)
     
     # Load names
-    from scale_up_test import discover_names
     all_names = discover_names(args.index_dir, min_samples=200)
     names = [n for n, c in all_names[:args.num_names]]
     

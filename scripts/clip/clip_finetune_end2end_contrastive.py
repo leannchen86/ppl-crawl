@@ -1,6 +1,9 @@
 """
-CLIP Fine-tuning for Face-Name Recognition.
-Uses OpenCLIP for efficient training with full fine-tuning.
+CLIP end-to-end fine-tuning (contrastive image↔text training).
+
+Difference vs the "probe" scripts:
+- probe scripts keep CLIP frozen and only train a classifier head on top of embeddings
+- this script updates CLIP itself using the CLIP contrastive loss on (face image, name prompt) pairs
 
 Goals:
 - reproducible runs (when --deterministic is enabled)
@@ -315,8 +318,15 @@ def main():
     parser.add_argument("--num-workers", type=int, default=4)
     parser.add_argument(
         "--index-dir",
-        default="/home/leann/face-detection/data/index_files_facechips512_filtered_score0.9_bbox32_areafrac0.001",
+        default="/home/leann/face-detection/data/index_files",
         help="Directory containing index_*.json files",
+    )
+    parser.add_argument(
+        "--image-source",
+        choices=["chips", "original"],
+        default="chips",
+        help="Choose which images to train on using the same index files: "
+        "'chips' uses index['good']; 'original' uses index['meta'][chip].src_path.",
     )
     parser.add_argument("--device", default=None, help="e.g. cuda, cuda:0, cpu (default: auto)")
     parser.add_argument("--log-every", type=int, default=25)
@@ -392,6 +402,7 @@ def main():
         split="train",
         seed=args.seed,
         prompt_mode="random",
+        image_source=args.image_source,  # type: ignore[arg-type]
     )
     
     val_dataset = FaceNameDataset(
@@ -402,6 +413,7 @@ def main():
         split="val",
         seed=args.seed,
         prompt_mode="deterministic",
+        image_source=args.image_source,  # type: ignore[arg-type]
     )
     
     # Create dataloaders

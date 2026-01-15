@@ -11,10 +11,11 @@ Checks:
 4. Proposes solutions
 
 Usage:
-    python debug_prediction_bias.py
+    python scripts/clip/analysis/debug_prediction_bias.py
 """
 import argparse
 import json
+import glob
 import numpy as np
 import torch
 import torch.nn as nn
@@ -34,6 +35,26 @@ def seed_everything(seed=42):
     random.seed(seed)
     np.random.seed(seed)
     torch.manual_seed(seed)
+
+
+def discover_names(index_dir: str, min_samples: int = 100):
+    """Find all names with enough samples (from index_*.json files)."""
+    names_with_counts = []
+
+    pattern = os.path.join(index_dir, "index_*.json")
+    for filepath in glob.glob(pattern):
+        name = os.path.basename(filepath).replace("index_", "").replace(".json", "")
+        try:
+            with open(filepath) as f:
+                data = json.load(f)
+            count = data.get("counts", {}).get("good", 0)
+            if count >= min_samples:
+                names_with_counts.append((name, count))
+        except Exception as e:
+            print(f"Warning: Could not read {filepath}: {e}")
+
+    names_with_counts.sort(key=lambda x: -x[1])
+    return names_with_counts
 
 
 class MultiNameDataset(torch.utils.data.Dataset):
@@ -234,8 +255,7 @@ def main():
     print("PREDICTION BIAS DEBUGGING")
     print("="*60)
     
-    # Load names (same as scale_up_test)
-    from scale_up_test import discover_names
+    # Load names (same selection logic as clip_probe_30way_scaleup.py)
     all_names = discover_names(args.index_dir, min_samples=200)
     names = [n for n, c in all_names[:args.num_names]]
     

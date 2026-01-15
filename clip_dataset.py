@@ -9,6 +9,8 @@ from PIL import Image
 from torch.utils.data import Dataset
 from typing import List, Dict
 
+from index_utils import ImageSource, resolve_good_images
+
 # Prompt templates - variety helps CLIP generalize
 PROMPT_TEMPLATES = [
     # Bare name (CRITICAL - most common real-world query)
@@ -59,6 +61,7 @@ class FaceNameDataset(Dataset):
         train_ratio: float = 0.8,
         seed: int = 42,
         prompt_mode: str = "random",  # Add this parameter
+        image_source: ImageSource = "chips",
     ):
         """
         Args:
@@ -85,7 +88,7 @@ class FaceNameDataset(Dataset):
             with open(index_path) as f:
                 index = json.load(f)
             
-            good_images = index.get("good", [])
+            good_images = resolve_good_images(index, image_source=image_source)
             gender = name_to_gender.get(name, "unknown")
             
             # Shuffle and split

@@ -25,8 +25,7 @@ from tqdm import tqdm
 
 try:
     from transformers import (
-        Qwen2VLForConditionalGeneration,
-        Qwen2VLProcessor,
+        AutoModelForVision2Seq,
         AutoProcessor,
         BitsAndBytesConfig,
         TrainingArguments,
@@ -154,8 +153,8 @@ class Qwen2VLForClassification(nn.Module):
         else:
             quantization_config = None
 
-        # Load base model
-        self.model = Qwen2VLForConditionalGeneration.from_pretrained(
+        # Load base model (AutoModelForVision2Seq handles both Qwen2-VL and Qwen2.5-VL)
+        self.model = AutoModelForVision2Seq.from_pretrained(
             model_id,
             quantization_config=quantization_config,
             torch_dtype=torch.bfloat16,
@@ -269,8 +268,7 @@ class ClassificationTrainer:
         # Loss with optional class weights
         self.loss_fn = nn.CrossEntropyLoss(weight=class_weights)
 
-        # Scaler for mixed precision
-        self.scaler = torch.cuda.amp.GradScaler()
+        # Note: GradScaler not needed for bfloat16 (only for float16)
 
     def collate_fn(self, batch):
         """Custom collate function."""
@@ -298,7 +296,7 @@ class ClassificationTrainer:
             # Move to device
             batch = {k: v.to(self.device) if isinstance(v, torch.Tensor) else v for k, v in batch.items()}
 
-            with torch.cuda.amp.autocast(dtype=torch.bfloat16):
+            with torch.amp.autocast('cuda', dtype=torch.bfloat16):
                 outputs = self.model(
                     input_ids=batch["input_ids"],
                     attention_mask=batch["attention_mask"],
@@ -308,13 +306,11 @@ class ClassificationTrainer:
                 )
                 loss = outputs["loss"] / self.gradient_accumulation_steps
 
-            self.scaler.scale(loss).backward()
+            loss.backward()
 
             if (step + 1) % self.gradient_accumulation_steps == 0:
-                self.scaler.unscale_(self.optimizer)
                 torch.nn.utils.clip_grad_norm_(self.model.parameters(), 1.0)
-                self.scaler.step(self.optimizer)
-                self.scaler.update()
+                self.optimizer.step()
                 self.scheduler.step()
                 self.optimizer.zero_grad()
 
@@ -338,7 +334,7 @@ class ClassificationTrainer:
         for batch in tqdm(dataloader, desc="Validating"):
             batch = {k: v.to(self.device) if isinstance(v, torch.Tensor) else v for k, v in batch.items()}
 
-            with torch.cuda.amp.autocast(dtype=torch.bfloat16):
+            with torch.amp.autocast('cuda', dtype=torch.bfloat16):
                 outputs = self.model(
                     input_ids=batch["input_ids"],
                     attention_mask=batch["attention_mask"],

@@ -17,7 +17,7 @@ pip install -r requirements.txt
 
 ```bash
 source venv/bin/activate
-python test_train_clip.py
+python scripts/clip/clip_two_name_sanity.py
 ```
 
 ---
@@ -28,14 +28,28 @@ Generate standardized **512×512** face chips (margin **0.5**, **reflect padding
 
 ```bash
 source /home/leann/face-detection/venv/bin/activate
-python /home/leann/face-detection/scripts/detect_faces_and_crop.py --fp16 --format jpg --jpeg-quality 95 --threshold 0.8
+python /home/leann/face-detection/scripts/data/detect_faces_and_crop.py --fp16 --format jpg --jpeg-quality 95 --threshold 0.8
+```
+
+Note: The face-chip generator reads original (non-cropped) images from:
+- `/home/leann/face-detection/data/original ppl images/` (default)
+- `/home/leann/ppl-images/` (back-compat symlink)
+
+Using the same index files, you can choose whether training uses **face chips** or **original images**:
+
+```bash
+# Train/eval on face chips (default)
+python /home/leann/face-detection/scripts/clip/clip_probe_30way_scaleup.py --index-dir /home/leann/face-detection/data/index_files --image-source chips
+
+# Train/eval on original uncropped images
+python /home/leann/face-detection/scripts/clip/clip_probe_30way_scaleup.py --index-dir /home/leann/face-detection/data/index_files --image-source original
 ```
 
 Then, point any training/analysis script at the new index directory, e.g.:
 
 ```bash
 source /home/leann/face-detection/venv/bin/activate
-python /home/leann/face-detection/scripts/scale_up_test.py --index-dir /home/leann/face-detection/data/index_files_facechips512_filtered_score0.9_bbox32_areafrac0.001 --balanced
+python /home/leann/face-detection/scripts/clip/clip_probe_30way_scaleup.py --index-dir /home/leann/face-detection/data/index_files --balanced
 ```
 
 ---
@@ -44,4 +58,4 @@ python /home/leann/face-detection/scripts/scale_up_test.py --index-dir /home/lea
 
 - Install Bun: `curl -fsSL https://bun.com/install | bash`
 - Get JSON data from Diffbot: `bun crawl.ts` (don't share that script; your API key is in it). This'll save into `entities.json`.
-- Get images data from entities.json: `bun crawl_img.ts` (change the range of entities pictures to crawl in that file, if needed). This'll save into `images/`.
+- Get images data from entities.json: `bun crawl_img.ts` (change the range of entities pictures to crawl in that file, if needed). Raw originals are expected under `/home/leann/face-detection/data/original ppl images/`.

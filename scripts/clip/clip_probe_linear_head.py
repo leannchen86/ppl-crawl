@@ -5,8 +5,8 @@ This tests whether CLIP embeddings already contain name-face signal,
 without the risk of catastrophic forgetting from full fine-tuning.
 
 Usage:
-    python linear_probe.py --names david michael --epochs 50
-    EXPERIMENT=2 python linear_probe.py --epochs 50  # Use same experiment selector
+    python scripts/clip/clip_probe_linear_head.py --names david michael --epochs 50
+    EXPERIMENT=2 python scripts/clip/clip_probe_linear_head.py --epochs 50  # Use same experiment selector
 """
 import argparse
 import json
@@ -136,7 +136,7 @@ def main():
     device = "cuda" if torch.cuda.is_available() else "cpu"
     seed_everything(args.seed)
     
-    # Experiment selector (same as test_train_clip.py)
+    # Experiment selector (same as clip_two_name_sanity.py)
     if args.names:
         target_names = args.names
         exp_name = f"Custom ({', '.join(args.names)})"

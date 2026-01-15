@@ -7,19 +7,46 @@ This document describes the organized structure of the face-detection project.
 ```
 face-detection/
 ├── scripts/              # All Python scripts and notebooks
-│   ├── detect_faces.py           # Face detection using RetinaFace
-│   ├── train_clip.py             # CLIP model training
-│   ├── test_train_clip.py        # CLIP training/testing
-│   ├── linear_probe.py           # Linear probe analysis
-│   ├── embedding_analysis.py     # Embedding space analysis
-│   ├── precision_recall_analysis.py
-│   ├── debug_prediction_bias.py  # Bias debugging
-│   ├── debugging_tool.py         # Rigorous debugging tool
-│   ├── advanced_viz.py           # Advanced visualizations
-│   ├── scale_up_test.py          # Scale-up testing
-│   ├── clip_dataset.py           # Dataset utilities
-│   ├── extract_first_names.py    # Name extraction utility
-│   └── data_analysis.ipynb       # Data analysis notebook
+│   ├── clip/                     # CLIP-based experiments + analyses
+│   │   ├── clip_finetune_end2end_contrastive.py
+│   │   ├── clip_two_name_sanity.py
+│   │   ├── clip_probe_linear_head.py
+│   │   ├── clip_probe_30way_scaleup.py
+│   │   ├── ablations/
+│   │   │   ├── ablation_remove_names.py
+│   │   │   ├── cosine_classifier_test.py
+│   │   │   └── permutation_test.py
+│   │   └── analysis/
+│   │       ├── advanced_viz.py
+│   │       ├── embedding_analysis.py
+│   │       ├── precision_recall_analysis.py
+│   │       ├── debug_prediction_bias.py
+│   │       ├── rigorous_bias_debug.py
+│   │       ├── confound_analysis.py
+│   │       └── compare_phase1_results.py
+│   ├── qwen2.5vl/                # Track 1: Qwen2.5-VL pipeline
+│   │   ├── prepare_qwen_dataset.py
+│   │   ├── train_qwen_vl.py
+│   │   ├── evaluate_qwen_vl.py
+│   │   └── run_track1_qwen.sh
+│   ├── ViT/                      # Track 2: ViT-from-scratch experiments
+│   │   ├── train_vit_scratch.py
+│   │   ├── run_track2_experiments.sh
+│   │   ├── analyze_track2_results.py
+│   │   ├── monkey_vit.py
+│   │   └── train_from_scratch_demo.py
+│   ├── data/                     # Data prep / validation utilities
+│   │   ├── detect_faces.py
+│   │   ├── detect_faces_and_crop.py
+│   │   ├── filter_facechips_index.py
+│   │   ├── validate_facechips_dataset.py
+│   │   └── extract_first_names.py
+│   ├── baselines/                # Non-CLIP baselines (ArcFace / quality filtering)
+│   │   ├── phase2b_quality_filtered.py
+│   │   └── phase3_arcface.py
+│   └── analysis/
+│       ├── compare_phases.py
+│       └── data_analysis.ipynb
 │
 ├── data/                 # All data files
 │   ├── index_files_facechips512_filtered_score0.9_bbox32_areafrac0.001/  # Primary training index (filtered face chips)

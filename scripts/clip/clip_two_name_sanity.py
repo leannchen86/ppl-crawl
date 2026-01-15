@@ -255,7 +255,14 @@ def main():
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument(
         "--index-dir",
-        default="/home/leann/face-detection/data/index_files_facechips512_filtered_score0.9_bbox32_areafrac0.001",
+        default="/home/leann/face-detection/data/index_files",
+    )
+    parser.add_argument(
+        "--image-source",
+        choices=["chips", "original"],
+        default="chips",
+        help="Choose which images to train on using the same index files: "
+        "'chips' uses index['good']; 'original' uses index['meta'][chip].src_path.",
     )
     parser.add_argument("--output-dir", default="./experiments/experiment_2names_all")
     parser.add_argument("--zero-shot-only", action="store_true", help="Only run zero-shot baseline")
@@ -316,6 +323,7 @@ def main():
         split="train",
         seed=args.seed,
         prompt_mode="random",
+        image_source=args.image_source,  # type: ignore[arg-type]
     )
     
     val_dataset = FaceNameDataset(
@@ -326,6 +334,7 @@ def main():
         split="val",
         seed=args.seed,
         prompt_mode="deterministic",
+        image_source=args.image_source,  # type: ignore[arg-type]
     )
     
     g = torch.Generator()

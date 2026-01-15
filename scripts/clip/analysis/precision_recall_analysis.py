@@ -209,7 +209,7 @@ def plot_confusion_top_names(predictions, true_labels, names, output_path, top_n
 def main():
     parser = argparse.ArgumentParser(description="Precision/Recall analysis for name-face task")
     parser.add_argument("--input-dir", default="./scale_up_results",
-                       help="Directory with predictions from scale_up_test.py")
+                       help="Directory with predictions from clip_probe_30way_scaleup.py")
     parser.add_argument("--output-dir", default=None,
                        help="Output directory (defaults to input-dir)")
     args = parser.parse_args()

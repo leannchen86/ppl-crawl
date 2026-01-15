@@ -198,12 +198,12 @@ When done, update:
 
 The following scripts have been created for this track:
 
-### 1. Data Preparation (`scripts/prepare_qwen_dataset.py`)
+### 1. Data Preparation (`scripts/qwen2.5vl/prepare_qwen_dataset.py`)
 Converts index files to Qwen VL compatible format.
 
 ```bash
 # Quick test with top 30 names
-python scripts/prepare_qwen_dataset.py \
+python scripts/qwen2.5vl/prepare_qwen_dataset.py \
     --index-dir data/index_files_facechips512_filtered_score0.9_bbox32_areafrac0.001 \
     --output-dir data/qwen_dataset_30names \
     --format classification \
@@ -211,18 +211,18 @@ python scripts/prepare_qwen_dataset.py \
     --max-per-name 1000
 
 # Full dataset
-python scripts/prepare_qwen_dataset.py \
+python scripts/qwen2.5vl/prepare_qwen_dataset.py \
     --index-dir data/index_files_facechips512_filtered_score0.9_bbox32_areafrac0.001 \
     --output-dir data/qwen_dataset_full \
     --format classification
 ```
 
-### 2. Training (`scripts/train_qwen_vl.py`)
+### 2. Training (`scripts/qwen2.5vl/train_qwen_vl.py`)
 Qwen 2.5 VL fine-tuning with classification head + optional LoRA.
 
 ```bash
 # Recommended: 7B model with classification head
-python scripts/train_qwen_vl.py \
+python scripts/qwen2.5vl/train_qwen_vl.py \
     --model-id Qwen/Qwen2.5-VL-7B-Instruct \
     --data-dir data/qwen_dataset_30names \
     --output-dir results/track1_qwen_vl/7b_classification \
@@ -232,28 +232,28 @@ python scripts/train_qwen_vl.py \
     --epochs 3
 ```
 
-### 3. Evaluation (`scripts/evaluate_qwen_vl.py`)
+### 3. Evaluation (`scripts/qwen2.5vl/evaluate_qwen_vl.py`)
 Generates standardized results for comparison with CLIP baseline.
 
 ```bash
-python scripts/evaluate_qwen_vl.py infer \
+python scripts/qwen2.5vl/evaluate_qwen_vl.py infer \
     --checkpoint-dir results/track1_qwen_vl/7b_classification/checkpoint_epoch_3 \
     --data-dir data/qwen_dataset_30names \
     --output-dir results/track1_qwen_vl/7b_classification
 ```
 
-### 4. Run Script (`scripts/run_track1_qwen.sh`)
+### 4. Run Script (`scripts/qwen2.5vl/run_track1_qwen.sh`)
 Convenience script for running the full pipeline.
 
 ```bash
 # Install dependencies
-./scripts/run_track1_qwen.sh install_deps
+./scripts/qwen2.5vl/run_track1_qwen.sh install_deps
 
 # Run quick test (3B model, faster)
-./scripts/run_track1_qwen.sh run_quick_test
+./scripts/qwen2.5vl/run_track1_qwen.sh run_quick_test
 
 # Run full pipeline (7B model)
-./scripts/run_track1_qwen.sh run_full_pipeline
+./scripts/qwen2.5vl/run_track1_qwen.sh run_full_pipeline
 ```
 
 ---
@@ -268,7 +268,7 @@ Convenience script for running the full pipeline.
 
 2. **Prepare dataset (start with 30 names for comparison):**
    ```bash
-   python scripts/prepare_qwen_dataset.py \
+   python scripts/qwen2.5vl/prepare_qwen_dataset.py \
        --index-dir data/index_files_facechips512_filtered_score0.9_bbox32_areafrac0.001 \
        --top-n-names 30 \
        --max-per-name 1000 \
@@ -277,7 +277,7 @@ Convenience script for running the full pipeline.
 
 3. **Run quick test with 3B model:**
    ```bash
-   ./scripts/run_track1_qwen.sh train_classification_3b
+   ./scripts/qwen2.5vl/run_track1_qwen.sh train_classification_3b
    ```
 
 ### Experiment Priority Order

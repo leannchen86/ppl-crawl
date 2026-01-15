@@ -1,5 +1,5 @@
 """
-Scale-Up Test: Test linear probe across many names and rank by accuracy.
+Scale-Up Test (30-way by default): linear probe across many names and rank by accuracy.
 
 This script:
 1. Discovers all available names from index files
@@ -8,8 +8,12 @@ This script:
 4. Outputs rankings to CSV
 
 Usage:
-    python scale_up_test.py --num-names 30 --epochs 50
-    python scale_up_test.py --num-names 30 --epochs 50 --balanced  # Equal samples per name
+    python scripts/clip/clip_probe_30way_scaleup.py --epochs 50
+    python scripts/clip/clip_probe_30way_scaleup.py --epochs 50 --balanced  # Equal samples per name
+
+Notes:
+- This script is named "30way" because the default benchmark is 30 classes.
+- You *can* override `--num-names`, but the filename will no longer match the run.
 """
 import argparse
 import json
@@ -26,6 +30,7 @@ from open_clip import create_model_and_transforms, get_tokenizer
 from collections import defaultdict
 
 from clip_dataset import FaceNameDataset, create_name_gender_mapping
+from index_utils import ImageSource, resolve_good_images
 
 
 def seed_everything(seed: int):
@@ -67,11 +72,12 @@ class MultiNameDataset(torch.utils.data.Dataset):
     """Dataset for multiple names."""
     
     def __init__(self, index_dir, names, transform, split="train", 
-                 train_ratio=0.8, seed=42, max_per_name=None):
+                 train_ratio=0.8, seed=42, max_per_name=None, image_source: ImageSource = "chips"):
         self.transform = transform
         self.samples = []  # (path, name_idx)
         self.names = names
         self.name_to_idx = {n: i for i, n in enumerate(names)}
+        self.image_source = image_source
         
         random.seed(seed)
         
@@ -83,7 +89,7 @@ class MultiNameDataset(torch.utils.data.Dataset):
             with open(index_path) as f:
                 data = json.load(f)
             
-            good_images = data.get("good", [])
+            good_images = resolve_good_images(data, image_source=self.image_source)
             random.shuffle(good_images)
             
             # Split
@@ -196,7 +202,14 @@ def main():
                         help="Max samples per name (for balanced mode)")
     parser.add_argument(
         "--index-dir",
-        default="/home/leann/face-detection/data/index_files_facechips512_filtered_score0.9_bbox32_areafrac0.001",
+        default="/home/leann/face-detection/data/index_files",
+    )
+    parser.add_argument(
+        "--image-source",
+        choices=["chips", "original"],
+        default="chips",
+        help="Choose which images to train/evaluate on using the same index files: "
+        "'chips' uses index['good']; 'original' uses index['meta'][chip].src_path.",
     )
     parser.add_argument("--output-dir", default="./scale_up_results")
     args = parser.parse_args()
@@ -204,6 +217,12 @@ def main():
     device = "cuda" if torch.cuda.is_available() else "cpu"
     seed_everything(args.seed)
     os.makedirs(args.output_dir, exist_ok=True)
+
+    if args.num_names != 30:
+        print(
+            f"Note: you set --num-names={args.num_names}. "
+            "This script is named '30way' because the default benchmark is 30 classes."
+        )
     
     # Discover available names
     print("Discovering names...")
@@ -237,11 +256,11 @@ def main():
     
     train_dataset = MultiNameDataset(
         args.index_dir, names, preprocess, 
-        split="train", seed=args.seed, max_per_name=max_per
+        split="train", seed=args.seed, max_per_name=max_per, image_source=args.image_source  # type: ignore[arg-type]
     )
     val_dataset = MultiNameDataset(
         args.index_dir, names, preprocess,
-        split="val", seed=args.seed, max_per_name=max_per
+        split="val", seed=args.seed, max_per_name=max_per, image_source=args.image_source  # type: ignore[arg-type]
     )
     
     print(f"\nTraining samples: {len(train_dataset)}")

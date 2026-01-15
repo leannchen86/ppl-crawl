@@ -4,12 +4,16 @@
 
 set -e  # Exit on error
 
-PROJECT_DIR="/home/leann/face-detection"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
 DATA_DIR="$PROJECT_DIR/data"
 # Canonical data: 512x512 face chips with reflect padding
 INDEX_DIR="$DATA_DIR/index_files_facechips512_filtered_score0.9_bbox32_areafrac0.001"
 RESULTS_DIR="$PROJECT_DIR/results/track1_qwen_vl"
-SCRIPTS_DIR="$PROJECT_DIR/scripts"
+SCRIPTS_DIR="$PROJECT_DIR/scripts/qwen2.5vl"
+
+# Ensure imports like `index_utils` resolve correctly
+cd "$PROJECT_DIR"
 
 # ============================================================
 # STEP 0: Install dependencies (run once)

@@ -15,6 +15,8 @@ from collections import defaultdict
 from typing import Optional
 import os
 
+from index_utils import ImageSource, resolve_good_images
+
 
 def load_all_names(index_dir: str) -> list[str]:
     """Load all available names from index files."""
@@ -26,14 +28,14 @@ def load_all_names(index_dir: str) -> list[str]:
     return sorted(names)
 
 
-def load_images_for_name(index_dir: str, name: str) -> list[str]:
-    """Load good images for a given name."""
+def load_images_for_name(index_dir: str, name: str, image_source: ImageSource = "chips") -> list[str]:
+    """Load good images for a given name, from either chips or original sources."""
     index_file = Path(index_dir) / f"index_{name}.json"
     if not index_file.exists():
         return []
     with open(index_file) as f:
         data = json.load(f)
-    return data.get("good", [])
+    return resolve_good_images(data, image_source=image_source)
 
 
 def create_train_val_split(
@@ -58,6 +60,7 @@ def create_classification_dataset(
     seed: int = 42,
     use_face_chips: bool = False,
     face_chips_dir: Optional[str] = None,
+    image_source: ImageSource = "chips",
 ):
     """
     Create classification dataset with image paths and label indices.
@@ -80,7 +83,7 @@ def create_classification_dataset(
     name_to_idx = {name: i for i, name in enumerate(names)}
 
     for name in names:
-        images = load_images_for_name(index_dir, name)
+        images = load_images_for_name(index_dir, name, image_source=image_source)
 
         # Optionally use face chips instead of original images
         if use_face_chips and face_chips_dir:
@@ -132,6 +135,7 @@ def create_conversation_dataset(
     use_face_chips: bool = False,
     face_chips_dir: Optional[str] = None,
     include_name_list: bool = True,
+    image_source: ImageSource = "chips",
 ):
     """
     Create conversation-format dataset for generative fine-tuning.
@@ -159,7 +163,7 @@ def create_conversation_dataset(
     val_samples = []
 
     for name in names:
-        images = load_images_for_name(index_dir, name)
+        images = load_images_for_name(index_dir, name, image_source=image_source)
 
         if use_face_chips and face_chips_dir:
             chip_dir = Path(face_chips_dir) / name
@@ -245,6 +249,7 @@ def create_multiple_choice_dataset(
     num_choices: int = 5,
     use_face_chips: bool = False,
     face_chips_dir: Optional[str] = None,
+    image_source: ImageSource = "chips",
 ):
     """
     Create multiple-choice dataset (easier task for sanity check).
@@ -264,7 +269,7 @@ def create_multiple_choice_dataset(
     rng = random.Random(seed)
 
     for name in names:
-        images = load_images_for_name(index_dir, name)
+        images = load_images_for_name(index_dir, name, image_source=image_source)
 
         if use_face_chips and face_chips_dir:
             chip_dir = Path(face_chips_dir) / name
@@ -367,7 +372,7 @@ def create_multiple_choice_dataset(
 
 def main():
     parser = argparse.ArgumentParser(description="Prepare dataset for Qwen 2.5 VL fine-tuning")
-    parser.add_argument("--index-dir", default="/home/leann/face-detection/data/index_files_facechips512_filtered_score0.9_bbox32_areafrac0.001",
+    parser.add_argument("--index-dir", default="/home/leann/face-detection/data/index_files",
                         help="Directory containing index_*.json files")
     parser.add_argument("--output-dir", default="/home/leann/face-detection/data/qwen_dataset",
                         help="Output directory for processed dataset")
@@ -389,6 +394,14 @@ def main():
     parser.add_argument("--face-chips-dir",
                         default="/home/leann/face-detection/data/face_chips_512_m0.5_reflect",
                         help="Directory containing face chip images")
+    parser.add_argument(
+        "--image-source",
+        choices=["chips", "original"],
+        default="chips",
+        help="Choose which images to use from the index files: "
+        "'chips' uses index['good']; 'original' uses index['meta'][chip].src_path. "
+        "Note: --use-face-chips overrides this by scanning --face-chips-dir directly.",
+    )
     parser.add_argument("--no-name-list", action="store_true",
                         help="Don't include name list in prompt (for conversation format)")
 
@@ -403,7 +416,7 @@ def main():
             # Sort by image count and take top N
             name_counts = []
             for name in all_names:
-                images = load_images_for_name(args.index_dir, name)
+                images = load_images_for_name(args.index_dir, name, image_source=args.image_source)  # type: ignore[arg-type]
                 name_counts.append((name, len(images)))
             name_counts.sort(key=lambda x: -x[1])
             names = [n for n, _ in name_counts[:args.top_n_names]]
@@ -422,6 +435,7 @@ def main():
             seed=args.seed,
             use_face_chips=args.use_face_chips,
             face_chips_dir=args.face_chips_dir,
+            image_source=args.image_source,  # type: ignore[arg-type]
         )
     elif args.format == "conversation":
         create_conversation_dataset(
@@ -434,6 +448,7 @@ def main():
             use_face_chips=args.use_face_chips,
             face_chips_dir=args.face_chips_dir,
             include_name_list=not args.no_name_list,
+            image_source=args.image_source,  # type: ignore[arg-type]
         )
     elif args.format == "multiple_choice":
         create_multiple_choice_dataset(
@@ -446,6 +461,7 @@ def main():
             num_choices=args.num_choices,
             use_face_chips=args.use_face_chips,
             face_chips_dir=args.face_chips_dir,
+            image_source=args.image_source,  # type: ignore[arg-type]
         )
 
 

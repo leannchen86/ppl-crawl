@@ -28,7 +28,7 @@ def load_image(args):
 
 def process_directory(name, detector):
     """Process a single person's image directory."""
-    IMAGE_DIR = f"/home/leann/ppl-images/{name}"
+    IMAGE_DIR = f"/home/leann/face-detection/data/original ppl images/{name}"
     INDEX_OUTPUT = f"/home/leann/face-detection/index_{name}.json"
 
     images_count = 10424  # highest image number in any directory
@@ -122,7 +122,7 @@ def main():
     detector = RetinaFace(gpu_id=0, fp16=True)
 
     # Process each person's directory
-    ppl_images_dir = "/home/leann/ppl-images"
+    ppl_images_dir = "/home/leann/face-detection/data/original ppl images"
     for name in os.listdir(ppl_images_dir):
         person_dir = os.path.join(ppl_images_dir, name)
         if os.path.isdir(person_dir):
