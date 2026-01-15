@@ -18,6 +18,7 @@ entities.json
 .DS_Store
 .env
 .venv/
+exports/
 
 # Local datasets (do not commit)
 data/face_chips_512_m0.5_reflect/
