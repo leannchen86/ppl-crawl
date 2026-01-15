@@ -1,0 +1,2 @@
+epoch,train_loss,train_acc,test_acc
+1,5.427599,2.1,2.3

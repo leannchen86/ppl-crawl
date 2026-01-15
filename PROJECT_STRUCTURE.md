@@ -59,23 +59,42 @@ face-detection/
 │   ├── name_classification_progress.json
 │   └── name_classification_progress.csv
 │
-├── experiments/          # Model checkpoints and experiment outputs
-│   ├── clip_checkpoints/         # CLIP model checkpoints
-│   ├── experiment_2names_all/    # 2-name experiment (all)
-│   ├── experiment_2names_female/ # 2-name experiment (female)
-│   └── experiment_2names_male/   # 2-name experiment (male)
+├── experiments/          # Experiment track documentation
+│   ├── TRACK1_QWEN_VL.md         # Qwen-VL experiment notes
+│   ├── TRACK2_VIT_SCRATCH.md     # ViT from-scratch notes
+│   ├── TRACK3_QUICK_EXPERIMENTS.md
+│   └── SYNC_PROTOCOL.md          # Multi-machine sync protocol
 │
-├── results/              # Analysis results and visualizations
-│   ├── scale_up_results/         # Scale-up test results (baseline)
-│   ├── embedding_analysis/       # Embedding analysis outputs
-│   ├── bias_debug/               # Bias debugging results
-│   ├── ablations/                # Ablation test results
-│   │   ├── no_william/           # Remove William ablation
-│   │   └── no_top3/              # Remove top-3 names ablation
-│   ├── cosine_classifier/        # Normalized weight experiments
-│   ├── permutation_test/         # Shuffled label experiments
-│   ├── confound_analysis/        # Photo quality confound analysis
-│   └── phase1_comprehensive_report.md  # Phase 1 summary
+├── results/              # All experiment outputs organized by model
+│   ├── clip/                     # CLIP-based experiment results
+│   │   ├── contrastive_finetune_30way/   # End-to-end CLIP fine-tuning
+│   │   ├── contrastive_finetune_demo/    # Demo fine-tuning run
+│   │   ├── linear_probe_30way_original/  # Linear probe on original images
+│   │   ├── linear_probe_30way_facechips/ # Linear probe on cropped faces
+│   │   ├── cosine_classifier/            # Cosine similarity classifier
+│   │   ├── embedding_viz/                # Embedding visualizations
+│   │   ├── bias_analysis/                # Prediction bias diagnostics
+│   │   ├── confound_analysis/            # Photo quality confounds
+│   │   ├── 2way_sanity_check/            # 2-person classification tests
+│   │   ├── early_checkpoints/            # Training checkpoints
+│   │   └── ablations/
+│   │       ├── name_removal_william/     # Remove "William" from training
+│   │       ├── name_removal_top3/        # Remove top-3 frequent names
+│   │       └── label_permutation_sanity/ # Shuffled labels (null test)
+│   ├── vit/                      # ViT from-scratch results
+│   │   ├── scratch_30way_full/           # Full training run
+│   │   ├── scratch_30way_demo/           # Demo training run
+│   │   ├── moo_optimizer/                # Moo optimizer experiments
+│   │   └── scratch_experiments/          # Additional experiments
+│   ├── qwen_vl/                  # Qwen2.5-VL results
+│   │   └── finetune_30way_3b/            # 3B model fine-tuning
+│   ├── baselines/                # Non-neural baselines
+│   │   ├── arcface_embeddings/           # ArcFace feature extraction
+│   │   ├── phase2b_quality_filtered/     # Quality-filtered baseline
+│   │   └── phase2b_quality_only/         # Quality-only baseline
+│   └── analysis/                 # Cross-method comparisons
+│       ├── method_comparison/            # Side-by-side model comparison
+│       └── clip_probe_report.md          # Comprehensive analysis report
 │
 ├── logs/                 # Log files and runtime data
 │   ├── detect_faces_full_run.log
@@ -91,32 +110,18 @@ face-detection/
 └── .gitignore           # Git ignore rules
 ```
 
-## Key Changes Made
+## Organization Principles
 
-1. **Organized scripts**: All Python scripts moved to `scripts/` folder
-2. **Consolidated data**: All data files (JSON, TXT, CSV) moved to `data/` folder
-3. **Index files**: Primary `index_*.json` files live in `data/index_files_facechips512_filtered_score0.9_bbox32_areafrac0.001/` (filtered face-chip dataset)
-4. **Experiments**: All checkpoint folders moved to `experiments/` with clearer naming
-5. **Results**: All analysis results consolidated in `results/` folder
-6. **Logs**: Runtime logs and reports moved to `logs/` folder
-7. **Crawlers**: TypeScript crawling scripts moved to `crawlers/` folder
-
-## Updated Script Paths
-
-All scripts have been updated to use the new directory structure:
-- `index_dir` defaults now point to `data/index_files_facechips512_filtered_score0.9_bbox32_areafrac0.001/`
-- `output_dir` defaults point to `experiments/` subdirectories
-- Data file paths updated to use `data/` folder
+1. **Scripts by model**: `scripts/clip/`, `scripts/vit/`, `scripts/qwen2.5vl/`
+2. **Results by model**: `results/clip/`, `results/vit/`, `results/qwen_vl/`
+3. **Descriptive naming**: Folder names indicate what was tested, not internal phase names
+4. **Data isolation**: Raw data in `data/`, outputs in `results/`
 
 ## Usage Notes
 
-- When running scripts, they will use the new paths by default
-- To override paths, use command-line arguments (e.g., `--index-dir`, `--output-dir`)
-- All existing functionality preserved with updated file locations
-
-
-
-
+- Scripts default to `data/index_files_facechips512_filtered_score0.9_bbox32_areafrac0.001/`
+- Override paths with `--index-dir`, `--output-dir` arguments
+- Experiment docs live in `experiments/` (TRACK*.md files)
 
 
 
